@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         holder = surface_camera.getHolder();
         holder.setKeepScreenOn(true);
         holder.addCallback(this);
+        holder.setFixedSize(1280,720);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
     }
@@ -148,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private void initCamera() {
         Camera.Parameters parameters = camera.getParameters();
         parameters.setPictureFormat(PixelFormat.JPEG);
+//        parameters.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
         parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);//连续对焦
         camera.setParameters(parameters);

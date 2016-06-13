@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.util.Log;
 
+import com.example.camara.MainActivity;
 import com.zhuchudong.toollibrary.L;
 
 import java.io.ByteArrayOutputStream;
@@ -23,7 +24,8 @@ public class ImageUtils {
 
         final int heightRatio = Math.round((float) height / (float) reqHeight);
         final int widthRatio = Math.round((float) width / (float) reqWidth);
-//            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+
+        inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
         inSampleSize = heightRatio;
 
         L.e("height：" + height + "width：" + width + "   reqHeight" + reqHeight + "     inSampleSize" + inSampleSize);
@@ -37,12 +39,13 @@ public class ImageUtils {
         BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
         //图片状态为旋转90
-        options.inSampleSize = calculateInSampleSize(options, 0, 450);
+        options.inSampleSize = calculateInSampleSize(options, width, width);
         options.inJustDecodeBounds = false;
         Bitmap smallBitmap = adjustPhotoRotation(BitmapFactory.decodeByteArray(data, 0, data.length, options), 90);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         float sacle = ((float) smallBitmap.getWidth()) / width;
         int height = (int) ((float) smallBitmap.getHeight() / sacle);
+        Constants.height =height;
         Bitmap lastBitmap = Bitmap.createScaledBitmap(smallBitmap, width, height, true);
         L.e("最后上传的图片：  height : " + lastBitmap.getHeight() + "    width :" + lastBitmap.getWidth());
         lastBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bos);
