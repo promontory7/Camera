@@ -7,8 +7,11 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.zhuchudong.toollibrary.L;
 
 import java.util.ArrayList;
 
@@ -20,6 +23,7 @@ public class SVDraw extends SurfaceView implements SurfaceHolder.Callback {
     public SurfaceHolder mSurfaceHolder;
     private int mWidth;
     private int mHeight;
+    private ArrayList<LocationBean> currentLocatios;
 
     public SVDraw(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,6 +35,16 @@ public class SVDraw extends SurfaceView implements SurfaceHolder.Callback {
 
     public SVDraw(Context context) {
         super(context);
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                L.i("点击了位置 "+event.getX()+"  "+event.getY());
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -46,22 +60,6 @@ public class SVDraw extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
-    }
-
-    public void drawlocation(int left, int top, int width, int height) {
-        Canvas canvas = mSurfaceHolder.lockCanvas();
-        if (canvas != null) {
-            canvas.drawColor(Color.TRANSPARENT);
-
-            Paint mPaint = new Paint();
-            mPaint.setAntiAlias(true);
-            mPaint.setColor(Color.GREEN);
-            mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setStrokeWidth(4);
-            canvas.drawRect(left, top, left + width, top + height, mPaint);
-
-            mSurfaceHolder.unlockCanvasAndPost(canvas);
-        }
     }
 
     public void drawlocation(ArrayList<LocationBean> locationBeanArrayList) {

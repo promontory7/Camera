@@ -1,5 +1,6 @@
 package com.example.camara;
 
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.View;
 import com.example.camara.utils.Constants;
 import com.example.camara.utils.ImageUtils;
 import com.example.camara.utils.Utils;
+import com.zhuchudong.toollibrary.L;
 import com.zhuchudong.toollibrary.StatusBarUtil;
 
 import java.io.IOException;
@@ -19,15 +21,16 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback, View.OnClickListener {
     //宽度450
-    TimerTask task;
+    private boolean isScreenPortrait = true;
+    private TimerTask task;
 
     private Timer timer;
-    Camera camera;
-    SurfaceHolder holder;
-    SurfaceView surface_camera;
-    SVDraw surface_tip;
+    private Camera camera;
+    private SurfaceHolder holder;
+    private SurfaceView surface_camera;
+    private SVDraw surface_tip;
 
-    Camera.PictureCallback currentCallBack;
+    private Camera.PictureCallback currentCallBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +38,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         setContentView(R.layout.activity_main);
         initView();
 
+        isScreenPortrait = Utils.isScreenOriatationPortrait(MainActivity.this);
         holder = surface_camera.getHolder();
         holder.setKeepScreenOn(true);
         holder.addCallback(this);
-        holder.setFixedSize(1280,720);
+//        holder.setFixedSize(1280,720);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
     }
@@ -150,12 +154,36 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         Camera.Parameters parameters = camera.getParameters();
         parameters.setPictureFormat(PixelFormat.JPEG);
 //        parameters.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+//        parameters.setPictureSize(800,800);
+//        parameters.setPreviewSize(800,800);
+
+        try {
+            if (isScreenPortrait) {
+                parameters.setPictureSize(surface_camera.getHeight(), surface_camera.getWidth());
+            } else {
+                parameters.setPictureSize(surface_camera.getWidth(), surface_camera.getHeight());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);//连续对焦
         camera.setParameters(parameters);
-        camera.setDisplayOrientation(90);
+        if (isScreenPortrait) {
+            camera.setDisplayOrientation(90);
+        }
         camera.startPreview();
         camera.cancelAutoFocus();
+    }
+
+
+    private final class NewCallback implements Camera.PictureCallback {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            Utils.savepicture(MainActivity.this, data);
+        }
     }
 
 
@@ -163,7 +191,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
             camera.startPreview();
-            byte[] compressDada = ImageUtils.processBitmapBytesSmaller(data, Constants.requestWidth);
+
+            isScreenPortrait = Utils.isScreenOriatationPortrait(MainActivity.this);
+
+            byte[] compressDada = ImageUtils.processBitmapBytesSmaller(data, Constants.requestWidth, isScreenPortrait);
 
             Utils.savepicture(MainActivity.this, compressDada);
 
@@ -177,9 +208,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
             camera.stopPreview();
-            byte[] compressDada = ImageUtils.processBitmapBytesSmaller(data, 450);
+            isScreenPortrait = Utils.isScreenOriatationPortrait(MainActivity.this);
 
-//            Utils.savepicture(MainActivity.this, compressDada);
+            byte[] compressDada = ImageUtils.processBitmapBytesSmaller2(data, 450, isScreenPortrait);
+
+            Utils.savepicture(MainActivity.this, compressDada);
             new UploadImageTask("http://192.168.1.133:4212/index/searcher", compressDada, surface_tip).execute();
 
         }

@@ -38,8 +38,8 @@ public class UploadImageTask extends AsyncTask {
     String url;
     byte[] data;
 
-    float xscare = 0;
-    float yscare = 0;
+    double xscare = 0;
+    double yscare = 0;
 
     public UploadImageTask(String url, byte[] data, SVDraw surfaceView) {
         this.surfaceView = surfaceView;

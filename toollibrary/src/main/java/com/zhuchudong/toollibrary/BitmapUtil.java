@@ -38,7 +38,7 @@ import java.io.InputStream;
  * Bitmap工具类主要包括获取Bitmap和对Bitmap的操作
  *
  */
-final class BitmapUtil {
+public class BitmapUtil {
 
     private static final boolean DEBUG = false;
     private static final String TAG = BitmapUtil.class.getSimpleName();
@@ -421,12 +421,12 @@ final class BitmapUtil {
      * @param image 源Bitmap
      * @return 压缩后的Bitmap
      */
-    public static Bitmap compressImage(Bitmap image) {
+    public static Bitmap compressImage(Bitmap image,int size) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, baos);// 质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
         int options = 100;
-        while (baos.toByteArray().length / 1024 > 100) { // 循环判断如果压缩后图片是否大于100kb,大于继续压缩
+        while (baos.toByteArray().length / 1024 > size) { // 循环判断如果压缩后图片是否大于100kb,大于继续压缩
             baos.reset();// 重置baos即清空baos
             image.compress(Bitmap.CompressFormat.JPEG, options, baos);// 这里压缩options%，把压缩后的数据存放到baos中
             options -= 10;// 每次都减少10
@@ -435,6 +435,7 @@ final class BitmapUtil {
         Bitmap bitmap = BitmapFactory.decodeStream(isBm, null, null);// 把ByteArrayInputStream数据生成图片
         return bitmap;
     }
+
 
     /**
      * 将彩色图转换为灰度图
@@ -695,6 +696,27 @@ final class BitmapUtil {
         float scaleHeight = ((float) newHeight) / height;
         // 开始缩放
         matrix.postScale(scaleWidth, scaleHeight);
+        // 创建缩放后的图片
+        return Bitmap.createBitmap(src, 0, 0, (int) width, (int) height,
+                matrix, true);
+    }
+
+    /**
+     * 图片的缩放方法
+     *
+     * @param src       ：源图片资源
+     * @param newWidth  ：缩放后宽度
+     */
+    public static Bitmap scalewidth(Bitmap src, double newWidth) {
+        // 记录src的宽高
+        float width = src.getWidth();
+        float height = src.getHeight();
+        // 创建一个matrix容器
+        Matrix matrix = new Matrix();
+        // 计算缩放比例
+        float scaleWidth = ((float) newWidth) / width;
+        // 开始缩放
+        matrix.postScale(scaleWidth, scaleWidth);
         // 创建缩放后的图片
         return Bitmap.createBitmap(src, 0, 0, (int) width, (int) height,
                 matrix, true);
