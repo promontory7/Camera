@@ -1,4 +1,4 @@
-package com.example.camara.utils;
+package com.example.camara;
 
 /**
  * Created by Administrator on 2016/6/13.
