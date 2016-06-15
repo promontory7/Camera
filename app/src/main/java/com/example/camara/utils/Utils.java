@@ -64,12 +64,12 @@ public class Utils {
         return mediaFile;
     }
 
-    public static void savepicture(Context context, byte[] bytes) {
+    public static String savepicture(Context context, byte[] bytes) {
         File pictureFile = Utils.getOutputMediaFile(context, Utils.MEDIA_TYPE_IMAGE);
         if (!pictureFile.exists()) {
             try {
                 pictureFile.createNewFile();
-                Log.e(TAG, "图片文件创建成功");
+                Log.i(TAG, "图片文件创建成功");
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e(TAG, "图片文件创建失败");
@@ -77,7 +77,7 @@ public class Utils {
         }
         if (pictureFile == null) {
             Log.e(TAG, "图片文件为空");
-            return;
+            return null;
         }
         try {
             FileOutputStream fos = new FileOutputStream(pictureFile);
@@ -89,5 +89,6 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return pictureFile.getAbsolutePath();
     }
 }

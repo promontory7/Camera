@@ -3,9 +3,8 @@ package com.example.camara.utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.util.Log;
 
-import com.example.camara.MainActivity;
+import com.example.camara.Constants;
 import com.zhuchudong.toollibrary.BitmapUtil;
 import com.zhuchudong.toollibrary.L;
 
@@ -66,13 +65,32 @@ public class ImageUtils {
     }
 
     // 根据路径获得图片并压缩，返回bitmap用于显示
-    public static byte[] processBitmapBytesSmaller2(byte[] data, int width, boolean isportrait) {
-        Bitmap beginBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-        Bitmap normalBitmap = BitmapUtil.rotate(beginBitmap, 90);
-        Bitmap compressBitmap =BitmapUtil.compressImage(normalBitmap,200);
-        Bitmap completeBitmap = BitmapUtil.scalewidth(compressBitmap, width);
-        L.e("completeBitmap  "+completeBitmap.getWidth()+"   "+completeBitmap.getHeight());
-        return BitmapUtil.getBytesFromBitmap(completeBitmap);
+    public static byte[] processBitmapBytesSmaller2(byte[] data, int width, int screenOrientation) {
+        Bitmap compressinSanple = BitmapUtil.compressBitmap(data, 0, width);
+        Bitmap normalBitmap = compressinSanple;
+        L.i("screenOrientation  " + screenOrientation);
+
+        switch (screenOrientation) {
+
+            case 1:
+                normalBitmap = BitmapUtil.rotate(compressinSanple, 90);
+                break;
+            case 2:
+                normalBitmap = BitmapUtil.rotate(compressinSanple, 180);
+                break;
+            case 3:
+                normalBitmap = BitmapUtil.rotate(compressinSanple, -90);
+                break;
+            case 4:
+                break;
+            default:
+                break;
+
+        }
+        Bitmap completeBitmap = BitmapUtil.scalewidth(normalBitmap, width);
+        Constants.height =completeBitmap.getHeight();
+        L.i("completeBitmap  " + completeBitmap.getWidth() + "   " + completeBitmap.getHeight());
+        return BitmapUtil.compressBitmaptoByte(completeBitmap, 100);
     }
 
     public static Bitmap adjustPhotoRotation(Bitmap bm, final int orientationDegree) {

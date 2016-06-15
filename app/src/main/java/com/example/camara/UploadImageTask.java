@@ -2,22 +2,16 @@ package com.example.camara;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.SurfaceView;
 
-import com.example.camara.utils.Constants;
-import com.example.camara.utils.ImageUtils;
 import com.zhuchudong.toollibrary.L;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,7 +49,7 @@ public class UploadImageTask extends AsyncTask {
     }
 
     public void initScare() {
-        xscare = (float) surfaceView.getWidth() / 450;
+        xscare = (float) surfaceView.getWidth() / Constants.requestWidth;
         yscare = surfaceView.getHeight()/ Constants.height;
         L.e("yscare" + yscare + "    xscare" + xscare);
     }

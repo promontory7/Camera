@@ -29,6 +29,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 import android.view.View;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,7 +37,6 @@ import java.io.InputStream;
 
 /**
  * Bitmap工具类主要包括获取Bitmap和对Bitmap的操作
- *
  */
 public class BitmapUtil {
 
@@ -52,6 +52,7 @@ public class BitmapUtil {
 
     /**
      * 图片压缩处理（使用Options的方法）
+     *
      * @param reqWidth  目标宽度,这里的宽高只是阀值，实际显示的图片将小于等于这个值
      * @param reqHeight 目标高度,这里的宽高只是阀值，实际显示的图片将小于等于这个值
      */
@@ -69,7 +70,7 @@ public class BitmapUtil {
                 final int widthRatio = Math.round((float) width
                         / (float) reqWidth);
                 inSampleSize = heightRatio < widthRatio ? heightRatio
-                                                        : widthRatio;
+                        : widthRatio;
             }
         }
         // 设置压缩比例
@@ -260,7 +261,7 @@ public class BitmapUtil {
         int height = drawable.getIntrinsicHeight();
         Bitmap bitmap = Bitmap.createBitmap(width, height, drawable
                 .getOpacity() != PixelFormat.OPAQUE ? Config.ARGB_8888
-                                                                                                       : Config.RGB_565);
+                : Config.RGB_565);
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, width, height);
         drawable.draw(canvas);
@@ -270,8 +271,9 @@ public class BitmapUtil {
 
     /**
      * 合并Bitmap
+     *
      * @param bgd 背景Bitmap
-     * @param fg 前景Bitmap
+     * @param fg  前景Bitmap
      * @return 合成后的Bitmap
      */
     public static Bitmap combineImages(Bitmap bgd, Bitmap fg) {
@@ -295,8 +297,9 @@ public class BitmapUtil {
 
     /**
      * 合并
+     *
      * @param bgd 后景Bitmap
-     * @param fg 前景Bitmap
+     * @param fg  前景Bitmap
      * @return 合成后Bitmap
      */
     public static Bitmap combineImagesToSameSize(Bitmap bgd, Bitmap fg) {
@@ -329,8 +332,8 @@ public class BitmapUtil {
      * 放大缩小图片
      *
      * @param bitmap 源Bitmap
-     * @param w 宽
-     * @param h 高
+     * @param w      宽
+     * @param h      高
      * @return 目标Bitmap
      */
     public static Bitmap zoom(Bitmap bitmap, int w, int h) {
@@ -348,7 +351,7 @@ public class BitmapUtil {
     /**
      * 获得圆角图片的方法
      *
-     * @param bitmap 源Bitmap
+     * @param bitmap  源Bitmap
      * @param roundPx 圆角大小
      * @return 期望Bitmap
      */
@@ -416,12 +419,41 @@ public class BitmapUtil {
     }
 
     /**
+     * get the orientation of the bitmap {@link android.media.ExifInterface}
+     * @param path
+     * @return
+     */
+    public  static int getDegress(String path) {
+        int degree = 0;
+        try {
+            ExifInterface exifInterface = new ExifInterface(path);
+            int orientation = exifInterface.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    degree = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    degree = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    degree = 270;
+                    break;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return degree;
+    }
+
+    /**
      * 压缩图片大小
      *
      * @param image 源Bitmap
      * @return 压缩后的Bitmap
      */
-    public static Bitmap compressImage(Bitmap image,int size) {
+    public static Bitmap compressBitmap(Bitmap image, int size) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, baos);// 质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
@@ -436,6 +468,75 @@ public class BitmapUtil {
         return bitmap;
     }
 
+    /**
+     * 压缩图片大小
+     *
+     * @param image 源Bitmap
+     * @return 压缩后的Bitmap
+     */
+    public static byte[] compressBitmaptoByte(Bitmap image, int size) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);// 质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
+        int options = 100;
+        while (baos.toByteArray().length / 1024 > size) { // 循环判断如果压缩后图片是否大于100kb,大于继续压缩
+            baos.reset();// 重置baos即清空baos
+            image.compress(Bitmap.CompressFormat.JPEG, options, baos);// 这里压缩options%，把压缩后的数据存放到baos中
+            options -= 5;// 每次都减少10
+        }
+        L.i("options  "+options);
+        return baos.toByteArray();
+    }
+
+    /**
+     * 比例压缩
+     * 压缩指定byte[]图片，并得到压缩后的图像
+     *
+     * @param bts
+     * @param reqsW
+     * @param reqsH
+     * @return
+     */
+    public static Bitmap compressBitmap(byte[] bts, int reqsW, int reqsH) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(bts, 0, bts.length, options);
+        options.inSampleSize = caculateInSampleSize(options, reqsW, reqsH);
+        options.inJustDecodeBounds = false;
+        L.i("inSampleSize   "+options.inSampleSize+"");
+        return BitmapFactory.decodeByteArray(bts, 0, bts.length, options);
+    }
+
+    /**
+     * caculate the bitmap sampleSize
+     *
+     * @return
+     */
+    public static int caculateInSampleSize(BitmapFactory.Options options, int rqsW, int rqsH) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+        if (rqsW == 0 && rqsH == 0) return 1;
+
+        if (rqsH == 0 && rqsW > 0) {
+            if (width > rqsW) {
+                final int widthRatio = Math.round((float) width / (float) rqsW);
+                return widthRatio;
+            }
+        }
+        if (rqsW == 0 && rqsH > 0) {
+            if (height > rqsH) {
+                final int heightRatio = Math.round((float) height / (float) rqsH);
+                return heightRatio;
+            }
+        }
+        if (height > rqsH || width > rqsW) {
+            final int heightRatio = Math.round((float) height / (float) rqsH);
+            final int widthRatio = Math.round((float) width / (float) rqsW);
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+        }
+        return inSampleSize;
+    }
 
     /**
      * 将彩色图转换为灰度图
@@ -704,8 +805,8 @@ public class BitmapUtil {
     /**
      * 图片的缩放方法
      *
-     * @param src       ：源图片资源
-     * @param newWidth  ：缩放后宽度
+     * @param src      ：源图片资源
+     * @param newWidth ：缩放后宽度
      */
     public static Bitmap scalewidth(Bitmap src, double newWidth) {
         // 记录src的宽高
